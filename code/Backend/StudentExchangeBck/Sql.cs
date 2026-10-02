@@ -7,12 +7,12 @@ namespace StudentExchangeBck
     public static class Sql
     {
         static readonly ReaderWriterLockSlim _lock = new ReaderWriterLockSlim();
-        static readonly Regex _validRead = new Regex("^(select) ");
-        static readonly Regex _validWrite = new Regex("^[(insert into)|(update)|(delete from)] ");
+        static readonly Regex _validRead = new Regex(@"^\s*select\b", RegexOptions.IgnoreCase);
+        static readonly Regex _validWrite = new Regex(@"^(insert\s+into|update|delete\s+from)\b", RegexOptions.IgnoreCase);
 
         public static Dictionary<string, List<object>> Read(string sql, Dictionary<string, object>? args = null)
         {
-            if (!_validRead.IsMatch(sql.Trim().ToLower()))
+            if (!_validRead.IsMatch(sql.Trim()))
                 throw new ArgumentException($"Only SELECT SQL statements are allowed in Sql.Read(): {sql}.");
             try
             {
