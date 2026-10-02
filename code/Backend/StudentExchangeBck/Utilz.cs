@@ -19,5 +19,12 @@
             }
             return string.Join(' ', split);
         }
+
+        static readonly TimeZoneInfo _mountainZone = TimeZoneInfo.FindSystemTimeZoneById("Mountain Standard Time");
+        public static DateTime ToMtn(DateTime? utc = null)
+        {
+            if (utc == null) utc = DateTime.UtcNow;
+            return TimeZoneInfo.ConvertTimeFromUtc(utc.Value, _mountainZone);
+        }
     }
 }
