@@ -1,6 +1,9 @@
 @StudentExchangeBck_HostAddress = http://localhost:5239
 
-GET {{StudentExchangeBck_HostAddress}}/weatherforecast/
+GET {{StudentExchangeBck_HostAddress}}/Schools/
+Accept: application/json
+
+POST {{StudentExchangeBck_HostAddress}}/Register/
 Accept: application/json
 
 ###
