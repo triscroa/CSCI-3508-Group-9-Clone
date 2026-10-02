@@ -1,6 +1,6 @@
 ﻿using System.Security.Cryptography;
 
-namespace StudentExchangeBck.Components
+namespace StudentExchangeBck
 {
     public static class AccessToken
     {
