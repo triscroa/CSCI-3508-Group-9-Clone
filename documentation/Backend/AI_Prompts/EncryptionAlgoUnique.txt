@@ -1,0 +1,7 @@
+>> I need a static class that has encrypt & decrypt functions. There is a string to encrypt or decrypt by a string password.
+
+>> when encrypt is the encrypted string unique according to the inputted text?
+
+>> Make the class so it is unique.
+
+>> I'm sorry make the text + password return an encrypted text that is unique to text + password.
