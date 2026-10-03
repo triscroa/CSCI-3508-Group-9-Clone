@@ -57,7 +57,7 @@ namespace StudentExchangeBck
                                 {
                                     { "@user", id },
                                     { "@token", token },
-                                    { "@expiry", Utilz.ToMtn(DateTime.UtcNow.Add(Env._AccessExpiry)) }
+                                    { "@expiry", Utilz.ToMtn(DateTime.UtcNow.Add(Env._AccessExpiry)).ToString("s") }
                                 }, 1);
                             break;
                         }
