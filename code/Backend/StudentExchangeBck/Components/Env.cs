@@ -8,7 +8,7 @@ namespace StudentExchangeBck
         public static string _emailSalt { get; private set; } = null!;
         public static string _passSalt { get; private set; } = null!;
 
-        public static readonly TimeSpan _AccessExpiry = new TimeSpan(21, 0, 0, 0);
+        public static readonly TimeSpan _tokenExpiry = new TimeSpan(21, 0, 0, 0);
 
         public static void GetEnv(string salt = "tempPass!^74*", string path = "bin_/.env")
         {
@@ -19,6 +19,9 @@ namespace StudentExchangeBck
             _appAccess = d["_appAccess"];
             _emailSalt = d["_emailSalt"];
             _passSalt = d["_passSalt"];
+
+            if (_tokenExpiry.TotalDays <= 1)
+                throw new Exception("Login needs expiry larger than 1 day.");
         }
     }
 }

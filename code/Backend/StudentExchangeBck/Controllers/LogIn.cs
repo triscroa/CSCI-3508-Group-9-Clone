@@ -38,7 +38,7 @@ namespace StudentExchangeBck
                             new Dictionary<string, object>
                             {
                                 {"@id", id },
-                                {"@now", Utilz.ToMtn().ToString("s") },
+                                {"@now", Utilz.ToMtn().AddDays(1).ToString("s") },
                             });
 
                 object token;
@@ -57,7 +57,7 @@ namespace StudentExchangeBck
                                 {
                                     { "@user", id },
                                     { "@token", token },
-                                    { "@expiry", Utilz.ToMtn(DateTime.UtcNow.Add(Env._AccessExpiry)).ToString("s") }
+                                    { "@expiry", Utilz.ToMtn(DateTime.UtcNow.Add(Env._tokenExpiry)).ToString("s") }
                                 }, 1);
                             break;
                         }
