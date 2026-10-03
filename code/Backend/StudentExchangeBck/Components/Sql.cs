@@ -71,7 +71,7 @@ namespace StudentExchangeBck
                             com.Parameters.AddWithValue(s.Key, s.Value);
 
                     var cnt = com.ExecuteNonQuery();
-                    if (cnt != updatedRows && updatedRows != -1)
+                    if (cnt != updatedRows && !new[] { -1, -2 }.Contains(updatedRows))
                         throw new Exception($"cnt({cnt}) != updatedRows({updatedRows})");
                     else if (cnt < 1 && updatedRows == -1)
                         throw new Exception($"cnt({cnt}) < 1");
