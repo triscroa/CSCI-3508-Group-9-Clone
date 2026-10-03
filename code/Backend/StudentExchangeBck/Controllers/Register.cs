@@ -163,9 +163,10 @@ namespace StudentExchangeBck
                     update.Add("password", passCrypt);
                 if (updateKeys.Contains("school"))
                     update.Add("school_id", schoolId);
+                var ku = update.Keys.ToList();
                 update.Add("id", userId);
 
-                Sql.Write($"UPDATE User SET {string.Join(", ", update.Keys.Select(k => $"[{k}]=@{k}"))} " +
+                Sql.Write($"UPDATE User SET {string.Join(", ", ku.Select(k => $"[{k}]=@{k}"))} " +
                             "WHERE [id]=@id", update.ToDictionary(s => "@" + s.Key, s => s.Value), 1);
 
                 return Ok(new
