@@ -12,8 +12,13 @@ namespace StudentExchangeBck
         public static readonly TimeSpan _blockedAccessTimeOut = new TimeSpan(0, 5, 0);
         public static readonly int _accessAttemps = 10;
 
-        public static void GetEnv(string salt = "tempPass!^74*", string path = "bin_/.env")
+        public static void GetEnv(string salt = "tempPass!^74*")
         {
+#if DEBUG
+            string path = "bin_/.env";
+#else
+            string path = "/home/bin_/.env";
+#endif
             var env = System.IO.File.ReadAllText(path);
             env = DeterministicEncryption.Decrypt(env, salt);
             var d = JsonConvert.DeserializeObject<Dictionary<string, string>>(env)!
