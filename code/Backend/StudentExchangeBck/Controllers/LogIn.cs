@@ -7,6 +7,9 @@ namespace StudentExchangeBck
     [Route("[controller]")]
     public class LogIn : ControllerBase
     {
+        public static readonly Dictionary<long, (object lck, DateTime dt)> _userLock
+            = new Dictionary<long, (object, DateTime)>();
+
         [HttpPost]
         public IActionResult Post(Info data)
         {
@@ -30,8 +33,13 @@ namespace StudentExchangeBck
                                     {"@email", emailCrypt },
                                     {"@pass", passCrypt }
                                 });
+
+                msg = IncInvalidForUser_Email(result.Count == 0, this, emailCrypt);
+                if (msg != null) return msg;
+
                 if (result.Count == 0)
                     throw new ArgumentException("Invalid Email or Password.");
+
                 var id = result["id"][0];
                 var first_name = result["first_name"][0];
 
@@ -92,6 +100,101 @@ namespace StudentExchangeBck
             }
         }
 
+        public static IActionResult? IncInvalidForUser_Email(bool increment, ControllerBase this_, object emailCrypt)
+        {
+            var result = Sql.Read("SELECT [id] FROM User WHERE [email]=@email",
+                                    new Dictionary<string, object> { { "@email", emailCrypt } });
+            if (result.Count == 0) return null;
+
+            return IncInvalidForUser(increment, this_, result["id"][0]);
+        }
+        public static IActionResult? IncInvalidForUser_Token(bool increment, ControllerBase this_, object token)
+        {
+            var result = Sql.Read("SELECT [user_id] FROM Access_Token WHERE [token]=@token",
+                                    new Dictionary<string, object> { { "@token", token } });
+            if (result.Count == 0) return null;
+
+            return IncInvalidForUser(increment, this_, result["user_id"][0]);
+        }
+        public static IActionResult? IncInvalidForUser(bool increment, ControllerBase this_, object userid_)
+        {
+            var userid = (long)userid_;
+
+            object ulock;
+            lock (_userLock)
+            {
+                var expiry = DateTime.Now.AddHours(1);
+                if (!_userLock.TryGetValue(userid, out var s))
+                {
+                    ulock = new object();
+                    _userLock.Add(userid, (ulock, expiry));
+                }
+                else
+                {
+                    ulock = s.lck;
+                    _userLock[userid] = (ulock, expiry);
+                }
+            }
+
+            lock (ulock)
+            {
+                var result = Sql.Read("SELECT [id],[count],[expiry] FROM Blocked_Users " +
+                                        "WHERE [user_id]=@userid AND [expiry]>@date",
+                                        new Dictionary<string, object> 
+                                        { 
+                                            { "@userid", userid },
+                                            { "@date", Utilz.ToMtn().ToString("s") }
+                                        });
+
+                if (result.Count == 0)
+                {
+                    if (increment)
+                    {
+                        Sql.Write("INSERT INTO Blocked_Users ([user_id],[count],[expiry]) VALUES " +
+                                    "(@userid,@count,@expiry)", new Dictionary<string, object>
+                                    {
+                                    {"@userid", userid },
+                                    {"@count", 1 },
+                                    {"@expiry", Utilz.ToMtn().Add(Env._blockedAccessTimeOut).ToString("s")}
+                                    }, 1);
+                    }
+                    return null;
+                }
+
+                var id = result["id"][0];
+                var count = (long)result["count"][0];
+                var expiry = DateTime.Parse((string)result["expiry"][0]);
+
+                if (increment)
+                {
+                    count++;
+                    var update = new Dictionary<string, object> { { "count", count } };
+
+                    if (count % Env._accessAttemps == 0 && count > Env._accessAttemps)
+                    {
+                        expiry = new[] { expiry, Utilz.ToMtn() }.Max().Add(Env._blockedAccessTimeOut);
+                        update.Add("expiry", expiry.ToString("s"));
+                    }
+
+                    var ku = update.Keys.ToList();
+                    update.Add("id", id);
+                    Sql.Write($"UPDATE Blocked_Users SET {string.Join(", ", ku.Select(k => $"[{k}]=@{k}"))} " +
+                                "WHERE [id]=@id", update.ToDictionary(s => "@" + s.Key, s => s.Value), 1);
+
+                    if (count == Env._accessAttemps)
+                        Sql.Write("DELETE FROM Access_Token WHERE [user_id]=@userid",
+                                    new Dictionary<string, object> { { "@userid", userid } }, -2);
+                }
+
+                if (count >= Env._accessAttemps)
+                    return this_.BadRequest(new
+                    {
+                        Message = $"You are now blocked from access till {expiry} Mountain Standard Time."
+                    });
+                return null;
+            }
+        }
+
         public static void CleanUp()
         {
             // Clean up old access tokens
@@ -99,6 +202,18 @@ namespace StudentExchangeBck
             {
                 {"@date", Utilz.ToMtn().ToString("s") }
             }, -2);
+
+            Sql.Write("DELETE FROM Blocked_Users WHERE [expiry]<@date", new Dictionary<string, object>
+            {
+                {"@date", Utilz.ToMtn().ToString("s") }
+            }, -2);
+
+            lock (_userLock)
+            {
+                var now = DateTime.Now;
+                foreach (var s in _userLock.Where(s => now > s.Value.dt))
+                    _userLock.Remove(s.Key);
+            }
         }
 
         public class Info : AppAuthJson

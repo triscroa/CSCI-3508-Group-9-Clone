@@ -9,6 +9,8 @@ namespace StudentExchangeBck
         public static string _passSalt { get; private set; } = null!;
 
         public static readonly TimeSpan _tokenExpiry = new TimeSpan(21, 0, 0, 0);
+        public static readonly TimeSpan _blockedAccessTimeOut = new TimeSpan(0, 5, 0);
+        public static readonly int _accessAttemps = 10;
 
         public static void GetEnv(string salt = "tempPass!^74*", string path = "bin_/.env")
         {
@@ -22,6 +24,8 @@ namespace StudentExchangeBck
 
             if (_tokenExpiry.TotalDays <= 1)
                 throw new Exception("Login needs expiry larger than 1 day.");
+            if (_accessAttemps <= 1)
+                throw new Exception("Login needs access attemps >1.");
         }
     }
 }
