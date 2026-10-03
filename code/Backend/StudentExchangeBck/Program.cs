@@ -1,4 +1,12 @@
-StudentExchangeBck.Env.GetEnv();
+using StudentExchangeBck;
+
+Env.GetEnv();
+
+Action Schedule = () =>
+{
+    LogIn.CleanUp();
+};
+var schedule = new Maitenance(324, Schedule);
 
 var builder = WebApplication.CreateBuilder(args);
 

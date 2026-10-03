@@ -24,7 +24,7 @@ namespace StudentExchangeBck
                 emailCrypt = DeterministicEncryption.Encrypt(data.email.Trim().ToLower(), Env._emailSalt);
                 passCrypt = DeterministicEncryption.Encrypt(data.password.Trim(), Env._passSalt);
 
-                var result = Sql.Read("SELECT [id] FROM User WHERE [email]=@email AND [password]=@pass",
+                var result = Sql.Read("SELECT [id],[first_name] FROM User WHERE [email]=@email AND [password]=@pass",
                                 new Dictionary<string, object>
                                 {
                                     {"@email", emailCrypt },
@@ -32,8 +32,9 @@ namespace StudentExchangeBck
                                 });
                 if (result.Count == 0)
                     throw new ArgumentException("Invalid Email or Password.");
-
                 var id = result["id"][0];
+                var first_name = result["first_name"][0];
+
                 result = Sql.Read("SELECT [token] FROM Access_Token WHERE [user_id]=@id AND [expiry]>@now",
                             new Dictionary<string, object>
                             {
@@ -71,7 +72,8 @@ namespace StudentExchangeBck
                 return StatusCode(201, new
                 {
                     Message = "Successfull Login.",
-                    access_token = token
+                    access_token = token,
+                    first_name = first_name
                 });
             }
             catch (ArgumentException e)
@@ -88,6 +90,15 @@ namespace StudentExchangeBck
                     Message = $"An internal server error occurred: {e}"
                 });
             }
+        }
+
+        public static void CleanUp()
+        {
+            // Clean up old access tokens
+            Sql.Write("DELETE FROM Access_Token WHERE [expiry]<@date", new Dictionary<string, object>
+            {
+                {"@date", Utilz.ToMtn().ToString("s") }
+            }, -2);
         }
 
         public class Info : AppAuthJson
