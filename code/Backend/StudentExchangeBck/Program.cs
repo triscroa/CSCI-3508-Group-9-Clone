@@ -6,6 +6,7 @@ Action Schedule = () =>
 {
     LogIn.CleanUp();
 };
+Schedule();
 var schedule = new Maitenance(324, Schedule);
 
 var builder = WebApplication.CreateBuilder(args);
