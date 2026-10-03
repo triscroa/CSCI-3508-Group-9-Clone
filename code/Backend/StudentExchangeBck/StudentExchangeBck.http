@@ -1,11 +1,15 @@
 @StudentExchangeBck_HostAddress = http://localhost:5239
 
-GET {{StudentExchangeBck_HostAddress}}/Schools/
+POST {{StudentExchangeBck_HostAddress}}/LogIn/
 Accept: application/json
 
 POST {{StudentExchangeBck_HostAddress}}/Register/
 Accept: application/json
+GET {{StudentExchangeBck_HostAddress}}/Register/
+Accept: application/json
+PATCH {{StudentExchangeBck_HostAddress}}/Register/
+Accept: application/json
 
-POST {{StudentExchangeBck_HostAddress}}/LogIn/
+GET {{StudentExchangeBck_HostAddress}}/Schools/
 Accept: application/json
 ###

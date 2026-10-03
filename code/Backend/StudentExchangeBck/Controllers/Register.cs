@@ -51,6 +51,145 @@ namespace StudentExchangeBck
             }
         }
 
+        [HttpGet]
+        public IActionResult Get(AppAuthJson request)
+        {
+            var msg = AppAuthJson.ValidateWithToken(this, request, out var userId);
+            if (msg != null) return msg;
+
+            try
+            {
+                var result = Sql.Read("SELECT [email],[first_name],[last_name],S.[name] school " +
+                                        "FROM User U, Schools S " +
+                                        "WHERE U.[id]=@id AND " +
+                                        "U.[school_id]=S.[id]",
+                                        new Dictionary<string, object>
+                                        {
+                                            {"@id", userId },
+                                        });
+                if (result.Count == 0)
+                    throw new Exception("There should have been a result for this user id, but there was none?");
+
+                return Ok(new
+                {
+                    email = DeterministicEncryption.Decrypt((string)result["email"][0], Env._emailSalt),
+                    first_name = result["first_name"][0],
+                    last_name = result["last_name"][0],
+                    school = result["school"][0]
+                });
+            }
+            catch (ArgumentException e)
+            {
+                return BadRequest(new
+                {
+                    Message = e.Message
+                });
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500, new
+                {
+                    Message = $"An internal server error occurred: {e}"
+                });
+            }
+        }
+
+        [HttpPatch]
+        public IActionResult Patch(Info info)
+        {
+            var msg = AppAuthJson.ValidateWithToken(this, info, out var userId);
+            if (msg != null) return msg;
+
+            try
+            {
+                var updateKeys = "email first_name last_name password school".Split().ToHashSet();
+                var cnt = updateKeys.Count;
+                var nullKeys = new HashSet<string>(cnt);
+                if (string.IsNullOrWhiteSpace(info.email))
+                { info.email = null; nullKeys.Add("email"); }
+                if (string.IsNullOrWhiteSpace(info.first_name))
+                { info.first_name = null; nullKeys.Add("first_name"); }
+                if (string.IsNullOrWhiteSpace(info.last_name))
+                { info.last_name = null; nullKeys.Add("last_name"); }
+                if (string.IsNullOrWhiteSpace(info.password))
+                { info.password = null; nullKeys.Add("password"); }
+                if (string.IsNullOrWhiteSpace(info.school))
+                { info.school = null; nullKeys.Add("school"); }
+                foreach (var k in nullKeys)
+                    if (!updateKeys.Remove(k))
+                        throw new Exception($"'nullkeys' has an extra key: {k}");
+                if (nullKeys.Count > cnt) throw new Exception("nullKeys.Count > cnt");
+                if (updateKeys.Count == 0)
+                    throw new ArgumentException("There is nothing to update.");
+
+                if (nullKeys.Count != 0)
+                {
+                    var col = nullKeys.Select(k => $"[{k}]").ToHashSet();
+                    if (col.Remove("[school]"))
+                        col.Add("S.[name] school");
+                    var result = Sql.Read($"SELECT {string.Join(',', col)} " +
+                                            "FROM User U, Schools S " +
+                                            "WHERE U.[id]=@id AND " +
+                                            "U.[school_id]=S.[id]",
+                                            new Dictionary<string, object>
+                                            {
+                                                {"@id", userId },
+                                            });
+                    if (result.Count == 0)
+                        throw new Exception("There should have been a result for this user id, but there was none?");
+
+                    if (info.email == null)
+                        info.email = DeterministicEncryption.Decrypt((string)result["email"][0], Env._emailSalt);
+                    if (info.first_name == null)
+                        info.first_name = (string)result["first_name"][0];
+                    if (info.last_name == null)
+                        info.last_name = (string)result["last_name"][0];
+                    if (info.password == null)
+                        info.password = DeterministicEncryption.Decrypt((string)result["password"][0], Env._passSalt);
+                    if (info.school == null)
+                        info.school = (string)result["school"][0];
+                }
+
+                ValidateFormatInfo(ref info, out var schoolId, out var emailCrypt, out var passCrypt);
+
+                var update = new Dictionary<string, object>(updateKeys.Count);
+                if (updateKeys.Contains("email"))
+                    update.Add("email", emailCrypt);
+                if (updateKeys.Contains("first_name"))
+                    update.Add("first_name", info.first_name!);
+                if (updateKeys.Contains("last_name"))
+                    update.Add("last_name", info.last_name!);
+                if (updateKeys.Contains("password"))
+                    update.Add("password", passCrypt);
+                if (updateKeys.Contains("school"))
+                    update.Add("school_id", schoolId);
+                update.Add("id", userId);
+
+                Sql.Write($"UPDATE User SET {string.Join(", ", update.Keys.Select(k => $"[{k}]=@{k}"))} " +
+                            "WHERE [id]=@id", update.ToDictionary(s => "@" + s.Key, s => s.Value), 1);
+
+                return Ok(new
+                {
+                    Message = $"Successfully updated: {string.Join(", ", updateKeys)}.",
+                    email = info.email
+                });
+            }
+            catch (ArgumentException e)
+            {
+                return BadRequest(new
+                {
+                    Message = e.Message
+                });
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500, new
+                {
+                    Message = $"An internal server error occurred: {e}"
+                });
+            }
+        }
+
         static readonly Regex _valEmail = new Regex(@"^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$");
         static readonly Regex _valName = new Regex(@"^[A-Z][a-z]*( [A-Z][a-z]*)*$");
         static readonly Regex _hasUpper = new Regex(@"[A-Z]+");
