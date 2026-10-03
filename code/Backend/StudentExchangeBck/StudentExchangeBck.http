@@ -6,4 +6,6 @@ Accept: application/json
 POST {{StudentExchangeBck_HostAddress}}/Register/
 Accept: application/json
 
+POST {{StudentExchangeBck_HostAddress}}/LogIn/
+Accept: application/json
 ###

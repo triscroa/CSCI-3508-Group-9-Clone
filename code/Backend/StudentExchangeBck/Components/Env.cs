@@ -8,6 +8,8 @@ namespace StudentExchangeBck
         public static string _emailSalt { get; private set; } = null!;
         public static string _passSalt { get; private set; } = null!;
 
+        public static readonly TimeSpan _AccessExpiry = new TimeSpan(21, 0, 0, 0);
+
         public static void GetEnv(string salt = "tempPass!^74*", string path = "bin_/.env")
         {
             var env = System.IO.File.ReadAllText(path);
