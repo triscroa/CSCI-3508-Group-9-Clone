@@ -89,8 +89,12 @@ namespace StudentExchangeBck
             }
             finally { _lock.ExitWriteLock(); }
         }
-
+#if DEBUG
         public static readonly string _path = Path.GetFullPath("bin_/Data.db");
+#else
+        public static readonly string _path = Path.GetFullPath("/home/bin_/Data.db");
+#endif
+
         static SqliteConnection SqLiteConnect()
             => new SqliteConnection($"Data Source={_path};");
     }
