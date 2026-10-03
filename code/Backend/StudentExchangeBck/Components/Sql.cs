@@ -54,6 +54,7 @@ namespace StudentExchangeBck
             if (!_validWrite.IsMatch(sql.Trim().ToLower()))
                 throw new ArgumentException($"Invalid SQL statement for Sql.Write(): {sql}.");
             SqliteTransaction? trans = null;
+            int cnt = 0;
             try
             {
                 _lock.EnterWriteLock();
@@ -70,18 +71,20 @@ namespace StudentExchangeBck
                         foreach (var s in args)
                             com.Parameters.AddWithValue(s.Key, s.Value);
 
-                    var cnt = com.ExecuteNonQuery();
+                    cnt = com.ExecuteNonQuery();
                     if (cnt != updatedRows && !new[] { -1, -2 }.Contains(updatedRows))
                         throw new Exception($"cnt({cnt}) != updatedRows({updatedRows})");
                     else if (cnt < 1 && updatedRows == -1)
                         throw new Exception($"cnt({cnt}) < 1");
 
-                    trans.Commit();
+                    if (cnt != 0)
+                        trans.Commit();
                 }
             }
             catch
             {
-                trans?.Rollback();
+                if (cnt != 0)
+                    trans?.Rollback();
                 throw;
             }
             finally { _lock.ExitWriteLock(); }
