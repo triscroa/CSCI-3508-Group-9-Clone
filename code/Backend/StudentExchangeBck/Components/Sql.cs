@@ -3,7 +3,14 @@ using System.Data;
 using System.Text.RegularExpressions;
 
 /* Asyncronus Read & Write to Sql:
- *      All Sql activity goes through these two functions only! */
+ *      All Sql activity goes through these two functions only! 
+ 
+  Read()
+    Async Read Sql Statement: 'SELECT' only
+
+  Write();
+    Async Write Sql Statement: 'INSERT', 'UPDATE', or 'DELETE' only
+ */
 
 namespace StudentExchangeBck
 {

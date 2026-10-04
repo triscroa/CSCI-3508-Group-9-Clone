@@ -1,13 +1,19 @@
 using StudentExchangeBck;
 
+// Get Enviroment
 Env.GetEnv();
 
+// Tasks that need to be occasionally cleaned
 Action Schedule = () =>
 {
     LogIn.CleanUp();
 };
+// Run Clean up at program start
 Schedule();
+// Schedule Clean up each day at time.
 var schedule = new Maitenance(324, Schedule);
+
+// ==================== Created by Visual Studio 2022 ============================
 
 var builder = WebApplication.CreateBuilder(args);
 
