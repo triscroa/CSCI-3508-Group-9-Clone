@@ -1,0 +1,1 @@
+>> Create a readme.md file. That is Developer documentation for StudentExchangeBck. This should include how to use the rest api, and also how to get up to speed as a developer in the project. Do your best work!
