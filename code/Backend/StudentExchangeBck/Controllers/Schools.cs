@@ -23,7 +23,7 @@ namespace StudentExchangeBck
         public Dictionary<string, object> Get()
         {
             // Get Schools from db
-            List<object> schools = Sql.Read("SELECT [name] FROM Schools")["name"];
+            List<object> schools = Sql.Read("SELECT [name] FROM Schools ORDER BY [name]")["name"];
             return new Dictionary<string, object>
             {
                 { "Schools", schools }
