@@ -75,7 +75,7 @@ namespace StudentExchangeBck
             byte[] encryptedData =
                 Convert.FromBase64String(encryptedText);
 
-            if (encryptedData.Length < 17)
+            if (encryptedData.Length < 32 || encryptedData.Length % 16 != 0)
                 throw new ArgumentException("Invalid encrypted text.");
 
             byte[] iv = encryptedData[..16];
