@@ -2,8 +2,13 @@
 
 namespace StudentExchangeBck
 {
+    /* Access Token: Created by A.I. */
     public static class AccessToken
     {
+        /// <summary>
+        /// Generate Access Token
+        /// </summary>
+        /// <returns>Generates Access Token</returns>
         public static string Generate()
         {
             byte[] bytes = RandomNumberGenerator.GetBytes(32);

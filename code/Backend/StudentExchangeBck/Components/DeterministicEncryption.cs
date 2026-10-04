@@ -1,6 +1,8 @@
 ﻿using System.Security.Cryptography;
 using System.Text;
 
+/* Deterministic Encryption: created by A.I. */
+
 namespace StudentExchangeBck
 {
     public static class DeterministicEncryption
