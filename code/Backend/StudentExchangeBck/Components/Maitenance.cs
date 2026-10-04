@@ -7,7 +7,7 @@ namespace StudentExchangeBck
     {
         readonly AutoResetEvent _evt;
         readonly Thread _thread;
-        bool _abortThread;
+        volatile bool _abortThread;
         // Time to run maitenance
         readonly TimeSpan _time;
         // Task to run at time
