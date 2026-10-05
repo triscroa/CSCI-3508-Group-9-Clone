@@ -3,16 +3,24 @@
 # Azure
 @StudentExchangeBck_HostAddress = https://studentexchangebck-fpdnfpcqe4bje2eh.westus-01.azurewebsites.net
 
+# Log in
 POST {{StudentExchangeBck_HostAddress}}/LogIn/
 Accept: application/json
+# Log out
+DELETE {{StudentExchangeBck_HostAddress}}/LogIn/
+Accept: application/json
 
+# Register user
 POST {{StudentExchangeBck_HostAddress}}/Register/
 Accept: application/json
+# Get user info
 GET {{StudentExchangeBck_HostAddress}}/Register/
 Accept: application/json
+# Update user info
 PATCH {{StudentExchangeBck_HostAddress}}/Register/
 Accept: application/json
 
+# Get all valid schools
 GET {{StudentExchangeBck_HostAddress}}/Schools/
 Accept: application/json
 ###
