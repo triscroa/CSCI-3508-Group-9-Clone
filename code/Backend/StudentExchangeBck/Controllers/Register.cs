@@ -48,18 +48,29 @@ namespace StudentExchangeBck
                 // Validate fields
                 ValidateFormatInfo(ref request, out var schoolId, out var emailCrypt, out var passCrypt);
 
-                // Insert user into db
-                Sql.Write($"INSERT INTO User ([email],[first_name],[last_name],[password],[school_id],[datetime]) " +
-                        $"VALUES (@email,@first_name,@last_name,@password,@school_id,@datetime)",
-                        new Dictionary<string, object>
-                        {
+                try
+                {
+                    // Insert user into db
+                    Sql.Write($"INSERT INTO User ([email],[first_name],[last_name],[password],[school_id],[datetime]) " +
+                            $"VALUES (@email,@first_name,@last_name,@password,@school_id,@datetime)",
+                            new Dictionary<string, object>
+                            {
                             {"@email", emailCrypt},
                             {"@first_name", request.first_name!},
                             {"@last_name", request.last_name!},
                             {"@password", passCrypt},
                             {"@school_id", schoolId},
                             {"@datetime", Utilz.ToMtn().ToString("s")},
-                        }, 1);
+                            }, 1);
+                }
+                catch (Microsoft.Data.Sqlite.SqliteException e)
+                {
+                    // Email that is already in the database
+                    if (e.Message.Contains("UNIQUE constraint failed: User.email"))
+                        return Conflict("A user with that email already exists.");
+
+                    throw;
+                }
 
                 // Success
                 return StatusCode(201, new
