@@ -157,6 +157,45 @@ namespace StudentExchangeBck
             }
         }
 
+        [HttpDelete]
+        public IActionResult Delete(AppAuthJson data)
+        {
+            // Validate Application Access & Access Token
+            var msg = AppAuthJson.ValidateWithToken(this, data, out var userId);
+            // Exit if invalid: No need to show an error.
+            if (msg != null) return Ok(new
+            {
+                Message = "You have been logged out."
+            });
+
+            try
+            {
+                // Delete All Access Tokens for user id
+                Sql.Write("DELETE FROM Access_Token WHERE [user_id]=@userid",
+                            new Dictionary<string, object> { { @"userid", userId } }, -2);
+
+                // Success
+                return Ok(new
+                {
+                    Message = "You have been logged out."
+                });
+            }
+            catch (ArgumentException e)
+            {
+                return BadRequest(new
+                {
+                    Message = e.Message
+                });
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500, new
+                {
+                    Message = $"An internal server error occurred: {e}"
+                });
+            }
+        }
+
         /// <summary>
         /// Checks for to many access attemps to a user. 
         /// Will block user for a timeout of too many invalid access attemps.
