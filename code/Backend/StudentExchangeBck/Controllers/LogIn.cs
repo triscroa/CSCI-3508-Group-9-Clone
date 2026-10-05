@@ -19,7 +19,7 @@ using static StudentExchangeBck.Register;
    IncInvalidForUser_Email():
    IncInvalidForUser_Token():
    IncInvalidForUser():
-        Checks for to many access attemps to a user. 
+        Checks for too many access attemps to a user. 
         Will block user for a timeout of too many invalid access attemps.
 
    GetUserLock():
