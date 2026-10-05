@@ -52,7 +52,7 @@ namespace StudentExchangeBck
         public IActionResult Post(Info data)
         {
             // Validate Application Access
-            var msg = AppAuthJson.Validate(data);
+            var msg = AppAuthJson.Validate(data, HttpContext);
             // If no Auth: return no auth
             if (msg != null) return msg;
 
@@ -173,7 +173,7 @@ namespace StudentExchangeBck
         public IActionResult Delete(AppAuthJson data)
         {
             // Validate Application Access & Access Token
-            var msg = AppAuthJson.ValidateWithToken(this, data, out var userId);
+            var msg = AppAuthJson.ValidateWithToken(this, data, HttpContext, out var userId);
             // Exit if invalid: No need to show an error.
             if (msg != null) return Ok(new
             {

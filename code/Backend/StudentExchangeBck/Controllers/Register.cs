@@ -39,7 +39,7 @@ namespace StudentExchangeBck
         public IActionResult Post(Info request)
         {
             // Validate Application Access
-            var msg = AppAuthJson.Validate(request);
+            var msg = AppAuthJson.Validate(request, HttpContext);
             // Exit if no auth
             if (msg != null) return msg;
 
@@ -104,7 +104,7 @@ namespace StudentExchangeBck
         public IActionResult Get(AppAuthJson request)
         {
             // Validate Application Access & Access Token
-            var msg = AppAuthJson.ValidateWithToken(this, request, out var userId);
+            var msg = AppAuthJson.ValidateWithToken(this, request, HttpContext, out var userId);
             // Exit if invalid
             if (msg != null) return msg;
 
@@ -155,7 +155,7 @@ namespace StudentExchangeBck
         public IActionResult Patch(Info info)
         {
             // Validate Application Access & Access Token
-            var msg = AppAuthJson.ValidateWithToken(this, info, out var userId);
+            var msg = AppAuthJson.ValidateWithToken(this, info, HttpContext, out var userId);
             // Exit if invalid
             if (msg != null) return msg;
 
