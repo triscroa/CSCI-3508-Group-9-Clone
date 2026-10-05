@@ -35,7 +35,7 @@ namespace StudentExchangeBck
         /// <returns>Changed text</returns>
         public static string FirstUpper(string txt)
         {
-            var split = txt.Split(' ');
+            var split = txt.Split(' ', StringSplitOptions.RemoveEmptyEntries);
             for (int i = 0; i < split.Length; i++)
             {
                 var w = split[i];
