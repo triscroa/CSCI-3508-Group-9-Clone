@@ -235,11 +235,23 @@ namespace StudentExchangeBck
                     update.Add("password", passCrypt);
                 if (updateKeys.Contains("school"))
                     update.Add("school_id", schoolId);
-                var ku = update.Keys.ToList();
-                update.Add("id", userId);
-                // Add updated info to database
-                Sql.Write($"UPDATE User SET {string.Join(", ", ku.Select(k => $"[{k}]=@{k}"))} " +
-                            "WHERE [id]=@id", update.ToDictionary(s => "@" + s.Key, s => s.Value), 1);
+
+                try
+                {
+                    var ku = update.Keys.ToList();
+                    update.Add("id", userId);
+                    // Add updated info to database
+                    Sql.Write($"UPDATE User SET {string.Join(", ", ku.Select(k => $"[{k}]=@{k}"))} " +
+                                "WHERE [id]=@id", update.ToDictionary(s => "@" + s.Key, s => s.Value), 1);
+                }
+                catch (Microsoft.Data.Sqlite.SqliteException e)
+                {
+                    // Email that is already in the database
+                    if (e.Message.Contains("UNIQUE constraint failed: User.email"))
+                        return Conflict("A user with that email already exists.");
+
+                    throw;
+                }
 
                 // Success
                 return Ok(new
