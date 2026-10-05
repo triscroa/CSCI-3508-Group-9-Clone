@@ -1,7 +1,7 @@
 # Local
-#@StudentExchangeBck_HostAddress = http://localhost:5239
+@StudentExchangeBck_HostAddress = http://localhost:5239
 # Azure
-@StudentExchangeBck_HostAddress = https://studentexchangebck-fpdnfpcqe4bje2eh.westus-01.azurewebsites.net
+#@StudentExchangeBck_HostAddress = https://studentexchangebck-fpdnfpcqe4bje2eh.westus-01.azurewebsites.net
 
 # Log in
 POST {{StudentExchangeBck_HostAddress}}/LogIn/
