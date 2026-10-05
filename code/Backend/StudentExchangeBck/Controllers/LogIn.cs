@@ -5,8 +5,14 @@ using static StudentExchangeBck.Register;
     
    POST Post():
         Login POST: Uses password and email to login.
-        If successfull: Returns {'access_token', 'first_name'}
         Input: {'email', 'password', 'app_access'}
+        Returns: If successfull: {'access_token', 'first_name'}
+
+   DELETE Delete():
+        Log Out
+        On Success: Deletes all access tokens for given user.
+        Input: {'app_access', 'access_token'}
+        Returns: OK(), Status 200
 
    ========================================================================
 
@@ -157,6 +163,12 @@ namespace StudentExchangeBck
             }
         }
 
+        /// <summary>
+        /// Log Out
+        /// On Success: Deletes all access tokens for given user.
+        /// </summary>
+        /// <param name="data">Input: {'app_access', 'access_token'}</param>
+        /// <returns>OK(), Status 200</returns>
         [HttpDelete]
         public IActionResult Delete(AppAuthJson data)
         {
