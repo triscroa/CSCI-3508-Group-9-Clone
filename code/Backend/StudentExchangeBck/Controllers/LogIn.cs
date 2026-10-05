@@ -302,7 +302,7 @@ namespace StudentExchangeBck
                 var expiry = DateTime.Parse((string)result["expiry"][0]);
 
                 // If you want to increment invalid access attemps
-                if (increment)
+                if (increment || count >= Env._accessAttemps)
                 {
                     count++;            // increment invalid access attempts
                     // columns to update
@@ -348,6 +348,7 @@ namespace StudentExchangeBck
         /// <returns>lock object</returns>
         public static object GetUserLock(long userid)
         {
+            if (userid < 0) throw new Exception("Invalid User ID.");
             object ulock;
             // Mutex lock on entire _userLock collection
             lock (_userLock)
